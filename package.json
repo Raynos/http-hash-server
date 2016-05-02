@@ -1,6 +1,6 @@
 {
   "name": "http-hash-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "HTTP server for http-hash router",
   "keywords": [],
   "author": "Matt Esch <matt@mattesch.info>",
