@@ -1,0 +1,31 @@
+import { TRouterOpts, TServicesInfo, THttpServiceRouter } from "./lib/router.hjs"
+import { THttpHashServer } from "./lib/server.hjs"
+import { THttpReq, THttpRes } from "./definitions/http.hjs"
+
+type CreateServerOpts : {
+    services: TServicesInfo,
+    urlNotFound?: (THttpReq, THttpRes) => void,
+    methodNotAllowed?: (THttpReq, THttpRes) => void,
+    hostname: String,
+    port: Number
+}
+
+RouterOptions : (this: TRouterOpts, {
+    services: TServicesInfo,
+    urlNotFound?: (THttpReq, THttpRes) => void,
+    methodNotAllowed?: (THttpReq, THttpRes) => void
+}) => void
+
+type TServerOptions : {
+    hostname?: String,
+    port: Number,
+    router: THttpServiceRouter
+}
+
+ServerOptions : (
+    this: TServerOptions,
+    opts: CreateServerOpts, 
+    router: THttpServiceRouter
+) => void
+
+createServer : (opts: CreateServerOpts) => THttpHashServer

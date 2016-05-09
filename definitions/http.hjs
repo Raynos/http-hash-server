@@ -1,0 +1,26 @@
+-- vim: set ft=Haskell:
+import { TBuffer } from "./buffer.hjs"
+
+type THttpReq : {
+    url: String,
+    method: String
+}
+
+type THttpRes : {
+    writeHead: (this: THttpRes, Number, Object<String, String>) => void,
+    end: (this: THttpRes, TBuffer) => void
+}
+
+type THttpServer : {
+    listen: (Number, String, cb: () => void) => void,
+    address: () => {
+        address: String,
+        family: String,
+        port: Number
+    },
+    close: (cb: () => void) => void
+}
+
+http : {
+    createServer: () => THttpServer
+}
