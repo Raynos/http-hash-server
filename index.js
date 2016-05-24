@@ -4,13 +4,15 @@
 var HttpHashRouter = require('./lib/router');
 var HttpHashServer = require('./lib/server.js');
 
+import type { HttpRequest, HttpResponse } from './lib/_types.js';
 import type { Router } from './lib/server.js';
 
+type RouteHandlerFn = (req: HttpRequest, res: HttpResponse, opts: null) => void;
 type ServicesConfig = { [k: string]: {
     route: string,
     methods: { [k: string]: {
         route: string,
-        handler: string,
+        handler: RouteHandlerFn,
         httpMethod: string
     } }
 } }
