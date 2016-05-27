@@ -550,7 +550,7 @@ test(least options HOSTNAME)
 test(double init throws)
 test(double close calls callback)
 test full GET PUT POST DELETE
-test 
+test
 */
 
 function testRoutes(assert, server, routes, cb) {
@@ -619,4 +619,4 @@ function testRoute(assert, server, route, cb) {
 // --> test route with splat and assert request context
 // --> test service prefix with id
 // --> test service prefix with splat (should not be allowed)
-// Do something about errors on the server 
+// Do something about errors on the server
