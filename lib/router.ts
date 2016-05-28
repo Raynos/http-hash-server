@@ -1,11 +1,11 @@
 'use strict';
 
-var assert = require('assert');
-var Buffer = require('buffer').Buffer;
+import assert from 'assert';
+import { Buffer } from 'buffer';
 
-var extend = require('xtend');
-var HttpHash = require('http-hash');
-var url = require('fast-url-parser');
+import extend from 'xtend';
+import HttpHash from 'http-hash';
+import url from 'fast-url-parser';
 
 var NOT_FOUND_BODY = new Buffer('{"message":"Not Found"}');
 var NOT_FOUND_STATUS_CODE = 404;
@@ -21,23 +21,25 @@ var METHOD_NOT_ALLOWED_HEADERS = {
     'content-length': METHOD_NOT_ALLOWED_BODY.length
 };
 
-module.exports = HttpServiceRouter;
+export default HttpServiceRouter;
 
-function HttpServiceRouter(routerOptions) {
-    var hash = this.hash = new HttpHash();
-    var services = routerOptions.services;
+class HttpServiceRouter {
+    constructor(routerOptions) {
+        var hash = this.hash = new HttpHash();
+        var services = routerOptions.services;
 
-    this.urlNotFound = routerOptions.urlNotFound || defaultNotFound;
-    this.methodNotAllowed = routerOptions.methodNotAllowed ||
-        defaultMethodNotAllowed;
+        this.urlNotFound = routerOptions.urlNotFound || defaultNotFound;
+        this.methodNotAllowed = routerOptions.methodNotAllowed ||
+            defaultMethodNotAllowed;
 
-    var serviceNames = Object.keys(services);
+        var serviceNames = Object.keys(services);
 
-    for (var i = 0; i < serviceNames.length; i++) {
-        var serviceName = serviceNames[i];
-        var service = services[serviceName];
+        for (var i = 0; i < serviceNames.length; i++) {
+            var serviceName = serviceNames[i];
+            var service = services[serviceName];
 
-        mountService(hash, serviceName, service);
+            mountService(hash, serviceName, service);
+        }
     }
 }
 

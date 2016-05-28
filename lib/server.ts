@@ -1,7 +1,7 @@
 'use strict';
 
-var assert = require('assert');
-var http = require('http');
+import assert from 'assert';
+import http from 'http';
 
 var DEFAULT_HOSTNAME = '127.0.0.1';
 
@@ -11,55 +11,57 @@ var T_STATE_LISTENING = 2;
 var T_STATE_DESTROYING = 3;
 var T_STATE_DESTROYED = 4;
 
-module.exports = HttpHashServer;
+export default HttpHashServer;
 
-function HttpHashServer(opts) {
-    assert(opts, 'Expected opts in HttpHashServer constructor');
+class HttpHashServer {
+    constructor(opts) {
+        assert(opts, 'Expected opts in HttpHashServer constructor');
 
-    var hostname = opts.hostname === undefined ?
-        DEFAULT_HOSTNAME :
-        opts.hostname;
+        var hostname = opts.hostname === undefined ?
+            DEFAULT_HOSTNAME :
+            opts.hostname;
 
-    assert(
-        typeof hostname === 'string',
-        'Expected hostname to be a string in HttpHashServer constructor'
-    );
+        assert(
+            typeof hostname === 'string',
+            'Expected hostname to be a string in HttpHashServer constructor'
+        );
 
-    var port = opts.port;
-    assert(
-        typeof port === 'number' && (port | 0) === port && port >= 0,
-        'Expected opts.port to be an integer >= 0 in HttpHashServer constructor'
-    );
+        var port = opts.port;
+        assert(
+            typeof port === 'number' && (port | 0) === port && port >= 0,
+            'Expected opts.port to be an integer >= 0 in HttpHashServer constructor'
+        );
 
-    var router = opts.router;
-    assert(router, 'Expected opts.router in HttpHashServer constructor');
+        var router = opts.router;
+        assert(router, 'Expected opts.router in HttpHashServer constructor');
 
-    this._state = T_STATE_BEFORE_LISTENING;
+        this._state = T_STATE_BEFORE_LISTENING;
 
-    this._httpServer = http.createServer();
-    this._router = router;
-    this._initcb = null;
+        this._httpServer = http.createServer();
+        this._router = router;
+        this._initcb = null;
 
-    this.family = '';
-    this.globalRequestOptions = opts.globalRequestOptions || {};
-    this.hostname = hostname;
-    this.port = port;
+        this.family = '';
+        this.globalRequestOptions = opts.globalRequestOptions || {};
+        this.hostname = hostname;
+        this.port = port;
 
-    this._httpServer.on('request', bindHttpHashHandleRequest);
-    this._httpServer.on('connection', bindHttpHashHandleConnection);
-    this._httpServer.on('error', bindHttpHashHandleError);
+        this._httpServer.on('request', bindHttpHashHandleRequest);
+        this._httpServer.on('connection', bindHttpHashHandleConnection);
+        this._httpServer.on('error', bindHttpHashHandleError);
 
-    var self = this;
-    function bindHttpHashHandleRequest(req, res) {
-        self._handleRequest(req, res);
-    }
+        var self = this;
+        function bindHttpHashHandleRequest(req, res) {
+            self._handleRequest(req, res);
+        }
 
-    function bindHttpHashHandleConnection(socket) {
-        self._handleConnection(socket);
-    }
+        function bindHttpHashHandleConnection(socket) {
+            self._handleConnection(socket);
+        }
 
-    function bindHttpHashHandleError(err) {
-        self._handleError(err);
+        function bindHttpHashHandleError(err) {
+            self._handleError(err);
+        }
     }
 }
 

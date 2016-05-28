@@ -1,11 +1,20 @@
 'use strict';
 
-var HttpHashRouter = require('./lib/router');
-var HttpHashServer = require('./lib/server.js');
+import HttpHashRouter from './lib/router';
+import HttpHashServer from './lib/server';
 
-module.exports = createServer;
+type ServerOpts = {
+    services: null;
+    urlNotFound?: null;
+    methodNotAllowed?: null;
+    port: null;
+    hostname: null;
+    globalRequestOptions: null;
+}
 
-function createServer(opts) {
+export default createServer;
+
+function createServer(opts: ServerOpts) {
     var routerOpts = new RouterOptions(opts);
     var router = new HttpHashRouter(routerOpts);
 
@@ -15,15 +24,28 @@ function createServer(opts) {
     return server;
 }
 
-function RouterOptions(opts) {
-    this.services = opts.services;
-    this.urlNotFound = opts.urlNotFound || null;
-    this.methodNotAllowed = opts.methodNotAllowed || null;
+class RouterOptions {
+    services: null;
+    urlNotFound: null;
+    methodNotAllowed: null;
+
+    constructor(opts: ServerOpts) {
+        this.services = opts.services;
+        this.urlNotFound = opts.urlNotFound || null;
+        this.methodNotAllowed = opts.methodNotAllowed || null;
+    }
 }
 
-function ServerOptions(opts, router) {
-    this.hostname = opts.hostname;
-    this.port = opts.port;
-    this.router = router;
-    this.gloabalRequestOptions = opts.globalRequestOptions;
+class ServerOptions {
+    hostname: null;
+    port: null;
+    router: HttpHashRouter;
+    globalRequestOptions: null;
+
+    constructor(opts: ServerOpts, router: HttpHashRouter) {
+        this.hostname = opts.hostname;
+        this.port = opts.port;
+        this.router = router;
+        this.globalRequestOptions = opts.globalRequestOptions;
+    }
 }

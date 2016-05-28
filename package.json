@@ -28,7 +28,10 @@
     "eslint-plugin-perf-standard": "1.0.2",
     "istanbul": "^0.3.5",
     "opn": "^1.0.1",
-    "tape": "^3.4.0"
+    "tape": "^3.4.0",
+    "tsd": "0.6.5",
+    "typescript": "1.9.0-dev.20160527-1.0",
+    "typings": "1.0.4"
   },
   "licenses": [
     {

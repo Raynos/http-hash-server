@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "allowJs": true,
+        "noEmit": true,
+        "noImplicitAny": true,
+        "noImplicitUseStrict": true,
+        "noImplicitThis": true,
+        "strictNullChecks": true
+    }
+}
