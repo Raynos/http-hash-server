@@ -1,18 +1,22 @@
 'use strict';
 
+import { IncomingMessage, ServerResponse } from 'http';
 import HttpHashRouter from './lib/router';
 import HttpHashServer from './lib/server';
+import { ServiceInfo } from './lib/router';
 
 type ServerOpts = {
-    services: null;
-    urlNotFound?: null;
-    methodNotAllowed?: null;
+    services: {
+        [serviceName: string]: ServiceInfo
+    };
+    urlNotFound: ServerHandlerFn | null;
+    methodNotAllowed: ServerHandlerFn | null;
     port: null;
     hostname: null;
     globalRequestOptions: null;
 }
 
-export default createServer;
+export = createServer;
 
 function createServer(opts: ServerOpts) {
     var routerOpts = new RouterOptions(opts);
@@ -24,10 +28,16 @@ function createServer(opts: ServerOpts) {
     return server;
 }
 
+type ServerHandlerFn = (
+    req: IncomingMessage, res: ServerResponse
+) => void;
+
 class RouterOptions {
-    services: null;
-    urlNotFound: null;
-    methodNotAllowed: null;
+    services: {
+        [serviceName: string]: ServiceInfo
+    };
+    urlNotFound: ServerHandlerFn | null;
+    methodNotAllowed: ServerHandlerFn | null;
 
     constructor(opts: ServerOpts) {
         this.services = opts.services;

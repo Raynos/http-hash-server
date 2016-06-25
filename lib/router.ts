@@ -1,11 +1,12 @@
 'use strict';
 
-import assert from 'assert';
+import { ServerRequest, ServerResponse } from 'http';
+import assert = require('assert');
 import { Buffer } from 'buffer';
 
-import extend from 'xtend';
-import HttpHash from 'http-hash';
-import url from 'fast-url-parser';
+import extend = require('xtend');
+import HttpHash = require('http-hash');
+import url = require('fast-url-parser');
 
 var NOT_FOUND_BODY = new Buffer('{"message":"Not Found"}');
 var NOT_FOUND_STATUS_CODE = 404;
@@ -23,9 +24,44 @@ var METHOD_NOT_ALLOWED_HEADERS = {
 
 export default HttpServiceRouter;
 
+type ServerHandlerFn = (
+    req: ServerRequest, res: ServerResponse, opts: HandlerOpts
+) => void;
+
+type HandlerOpts = {
+    requestContext: HttpRequestContext;
+};
+
+type RoutesInfo = {
+    [method: string]: {
+        handleRequest: ServerHandlerFn
+    };
+}
+
+export type ServiceInfo = {
+    route: string;
+    methods: {
+        [methodName: string]: {
+            route: string;
+            handler: ServerHandlerFn;
+            httpMethod: string;
+        }
+    };
+}
+
 class HttpServiceRouter {
-    constructor(routerOptions) {
-        var hash = this.hash = new HttpHash();
+    hash: HttpHash<RoutesInfo>;
+    urlNotFound: ServerHandlerFn;
+    methodNotAllowed: ServerHandlerFn;
+
+    constructor(routerOptions: {
+        services: {
+            [serviceName: string]: ServiceInfo
+        };
+        urlNotFound: ServerHandlerFn | null;
+        methodNotAllowed: ServerHandlerFn | null;
+    }) {
+        var hash = this.hash = new HttpHash<RoutesInfo>();
         var services = routerOptions.services;
 
         this.urlNotFound = routerOptions.urlNotFound || defaultNotFound;
@@ -41,12 +77,43 @@ class HttpServiceRouter {
             mountService(hash, serviceName, service);
         }
     }
+
+    handleRequest(
+        req: ServerRequest, res: ServerResponse, opts: HandlerOpts
+    ) {
+        var requestTime = Date.now();
+        var perRequestOpts = extend(opts);
+        var parsedUrl = url.parse(req.url, true);
+
+        var route = this.hash.get(parsedUrl.pathname);
+        var methodHandlers = route.handler;
+        perRequestOpts.requestContext = new HttpRequestContext(
+            requestTime,
+            parsedUrl,
+            route
+        );
+
+        if (methodHandlers) {
+            var handler = methodHandlers[req.method];
+
+            if (handler) {
+                handler.handleRequest(req, res, perRequestOpts);
+            } else {
+                this.methodNotAllowed(req, res, perRequestOpts);
+            }
+        } else {
+            this.urlNotFound(req, res, perRequestOpts);
+        }
+    }
 }
 
-HttpServiceRouter.prototype.handleRequest = handleEndpointRequest;
-
-function mountService(hash, serviceName, serviceDefinition) {
+function mountService(
+    hash: HttpHash<RoutesInfo>, 
+    serviceName: string,
+    serviceDefinition: ServiceInfo
+) {
     var routePrefix = serviceDefinition.route;
+
     assert(
         typeof routePrefix === 'string' && routePrefix.charAt(0) === '/',
         'Expected service ' + serviceName +
@@ -106,63 +173,58 @@ function mountService(hash, serviceName, serviceDefinition) {
     }
 }
 
-function Endpoint(serviceName, methodName, routeHandler) {
-    this.serviceName = serviceName;
-    this.methodName = methodName;
-    this.routeHandler = routeHandler;
-}
+class Endpoint {
+    serviceName: string;
+    methodName: string;
+    routeHandler: ServerHandlerFn;
 
-Endpoint.prototype.handleRequest = endpointHandleRequest;
+    constructor(
+        serviceName: string,
+        methodName: string,
+        routeHandler: ServerHandlerFn
+    ) {
+        this.serviceName = serviceName;
+        this.methodName = methodName;
+        this.routeHandler = routeHandler;
+    }
 
-function endpointHandleRequest(req, res, opts) {
-    var requestContext = opts.requestContext;
-    requestContext.serviceName = this.serviceName;
-    requestContext.methodName = this.methodName;
-    this.routeHandler(req, res, opts);
-}
-
-function handleEndpointRequest(req, res, opts) {
-    var requestTime = Date.now();
-    var perRequestOpts = extend(opts);
-    var requestContext = perRequestOpts.requestContext = {};
-    var parsedUrl = requestContext.parsedUrl = url.parse(req.url, true);
-
-    var route = this.hash.get(parsedUrl.pathname);
-    var methodHandlers = route.handler;
-    perRequestOpts.requestContext = new HttpRequestContext(
-        requestTime,
-        parsedUrl,
-        route
-    );
-
-    if (methodHandlers) {
-        var handler = methodHandlers[req.method];
-
-        if (handler) {
-            handler.handleRequest(req, res, perRequestOpts);
-        } else {
-            this.methodNotAllowed(req, res, perRequestOpts);
-        }
-    } else {
-        this.urlNotFound(req, res, perRequestOpts);
+    handleRequest(
+        req: ServerRequest,
+        res: ServerResponse,
+        opts: HandlerOpts
+    ) {
+        var requestContext = opts.requestContext;
+        requestContext.serviceName = this.serviceName;
+        requestContext.methodName = this.methodName;
+        this.routeHandler(req, res, opts);
     }
 }
 
-function defaultNotFound(req, res) {
+function defaultNotFound(req: ServerRequest, res: ServerResponse) {
     res.writeHead(NOT_FOUND_STATUS_CODE, NOT_FOUND_HEADERS);
     res.end(NOT_FOUND_BODY);
 }
 
-function defaultMethodNotAllowed(req, res) {
+function defaultMethodNotAllowed(req: ServerRequest, res: ServerResponse) {
     res.writeHead(METHOD_NOT_ALLOWED_STATUS_CODE, METHOD_NOT_ALLOWED_HEADERS);
     res.end(METHOD_NOT_ALLOWED_BODY);
 }
 
-function HttpRequestContext(requestTime, parsedUrl, route) {
-    this.requestTime = requestTime;
-    this.parsedUrl = parsedUrl;
-    this.params = route.params;
-    this.splat = route.splat;
-    this.serviceName = null;
-    this.methodName = null;
+class HttpRequestContext {
+    serviceName: string | null;
+    methodName: string | null;
+
+    constructor(requestTime: number, parsedUrl: {
+        pathname: string
+    }, route: {
+        params: null;
+        splat: null;
+    }) {
+        this.requestTime = requestTime;
+        this.parsedUrl = parsedUrl;
+        this.params = route.params;
+        this.splat = route.splat;
+        this.serviceName = null;
+        this.methodName = null;
+    }
 }
