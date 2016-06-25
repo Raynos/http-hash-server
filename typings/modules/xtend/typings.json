@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/typed-typings/npm-xtend/63cccadf3295b3c15561ee45617ac006edcca9e0/typings.json",
+    "raw": "registry:npm/xtend#4.0.0+20160211003958",
+    "main": "immutable.d.ts",
+    "global": false,
+    "name": "xtend",
+    "type": "typings"
+  }
+}

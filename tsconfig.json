@@ -2,10 +2,14 @@
     "compilerOptions": {
         "module": "commonjs",
         "allowJs": true,
-        "noEmit": true,
+        "outDir": "build",
         "noImplicitAny": true,
         "noImplicitUseStrict": true,
         "noImplicitThis": true,
         "strictNullChecks": true
-    }
+    },
+    "files": [
+        "index.ts",
+        "typings/index.d.ts"
+    ]
 }
