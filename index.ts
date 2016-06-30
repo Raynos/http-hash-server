@@ -11,8 +11,8 @@ type ServerOpts = {
     };
     urlNotFound: ServerHandlerFn | null;
     methodNotAllowed: ServerHandlerFn | null;
-    port: null;
-    hostname: null;
+    port: number;
+    hostname: string | undefined;
     globalRequestOptions: null;
 }
 
@@ -47,8 +47,8 @@ class RouterOptions {
 }
 
 class ServerOptions {
-    hostname: null;
-    port: null;
+    hostname: string | undefined;
+    port: number;
     router: HttpHashRouter;
     globalRequestOptions: null;
 

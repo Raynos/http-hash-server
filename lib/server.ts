@@ -1,7 +1,17 @@
 'use strict';
 
-import assert from 'assert';
-import http from 'http';
+import assert = require('assert');
+import http = require('http');
+
+import { Server } from 'http';
+import { Socket } from 'net';
+import { ServerRequest, ServerResponse } from 'http';
+import HttpHashRouter from './router';
+import { HandlerOpts } from './router';
+
+interface Callback<T> {
+    (err: null | Error, value?: T): void;
+}
 
 var DEFAULT_HOSTNAME = '127.0.0.1';
 
@@ -14,7 +24,21 @@ var T_STATE_DESTROYED = 4;
 export default HttpHashServer;
 
 class HttpHashServer {
-    constructor(opts) {
+    _state: number;
+    _httpServer: Server;
+    _router: HttpHashRouter;
+    _initcb: null | Callback<void>;
+    family: string;
+    globalRequestOptions: HandlerOpts;
+    hostname: string;
+    port: number;
+
+    constructor(opts: {
+        hostname: string | undefined;
+        port: number;
+        router: HttpHashRouter;
+        globalRequestOptions: null;
+    }) {
         assert(opts, 'Expected opts in HttpHashServer constructor');
 
         var hostname = opts.hostname === undefined ?
@@ -51,100 +75,96 @@ class HttpHashServer {
         this._httpServer.on('error', bindHttpHashHandleError);
 
         var self = this;
-        function bindHttpHashHandleRequest(req, res) {
+
+        function bindHttpHashHandleRequest(
+            req: ServerRequest, res: ServerResponse
+        ) {
             self._handleRequest(req, res);
         }
 
-        function bindHttpHashHandleConnection(socket) {
+        function bindHttpHashHandleConnection(socket: Socket) {
             self._handleConnection(socket);
         }
 
-        function bindHttpHashHandleError(err) {
+        function bindHttpHashHandleError(err: Error) {
             self._handleError(err);
         }
     }
-}
 
-HttpHashServer.prototype._handleRequest = serverHandleRequest;
-function serverHandleRequest(req, res) {
-    this._router.handleRequest(req, res, this.globalRequestOptions);
-}
-
-HttpHashServer.prototype._handleConnection = serverHandleConnection;
-function serverHandleConnection(socket) {
-    socket.setNoDelay(true);
-    // TODO add custom timeout mechanism
-}
-
-HttpHashServer.prototype._handleError = serverHandleError;
-function serverHandleError(err) {
-    if (this._initcb) {
-        var initcb = this._initcb;
-        this._initcb = null;
-        initcb(err);
-    } else {
-        throw err;
-    }
-}
-
-HttpHashServer.prototype.listen = serverListen;
-function serverListen(callback) {
-    var self = this;
-
-    assert(
-        self._state === T_STATE_BEFORE_LISTENING,
-        'Expected one call to server.listen'
-    );
-
-    self._initcb = callback;
-    self._state = T_STATE_BEGIN_LISTENING;
-    self._httpServer.listen(this.port, this.hostname, bindOnServerListening);
-
-    function bindOnServerListening() {
-        self._onServerListening();
-    }
-}
-
-HttpHashServer.prototype.destroy = serverDestroy;
-function serverDestroy(callback) {
-    var self = this;
-
-    if (self._state !== T_STATE_LISTENING) {
-        return;
+    _handleRequest(req: ServerRequest, res: ServerResponse) {
+        this._router.handleRequest(req, res, this.globalRequestOptions);
     }
 
-    self._state = T_STATE_DESTROYING;
-
-    self._httpServer.close(function bindOnServerDestroyed() {
-        self._onServerDestroyed(callback);
-    });
-}
-
-HttpHashServer.prototype._onServerListening = onServerListening;
-function onServerListening() {
-    var self = this;
-    var callback = self._initcb;
-    self._initcb = null;
-
-    self._state = T_STATE_LISTENING;
-
-    var address = self._httpServer.address();
-    self.hostname = address.address;
-    self.family = address.family;
-    self.port = address.port;
-
-    if (callback) {
-        callback(null);
-        return;
+    _handleConnection(socket: Socket) {
+        socket.setNoDelay(true);
+        // TODO add custom timeout mechanism
     }
-}
 
-HttpHashServer.prototype._onServerDestroyed = onServerDestroyed;
-function onServerDestroyed(callback) {
-    this._state = T_STATE_DESTROYED;
+    _handleError(err: Error) {
+        if (this._initcb) {
+            var initcb = this._initcb;
+            this._initcb = null;
+            initcb(err);
+        } else {
+            throw err;
+        }
+    }
 
-    if (callback) {
-        callback(null);
-        return;
+    listen(callback: (err: Error) => void) {
+        var self = this;
+
+        assert(
+            self._state === T_STATE_BEFORE_LISTENING,
+            'Expected one call to server.listen'
+        );
+
+        self._initcb = callback;
+        self._state = T_STATE_BEGIN_LISTENING;
+        self._httpServer.listen(this.port, this.hostname, bindOnServerListening);
+
+        function bindOnServerListening() {
+            self._onServerListening();
+        }
+    }
+
+    _onServerListening() {
+        var self = this;
+        var callback = self._initcb;
+        self._initcb = null;
+
+        self._state = T_STATE_LISTENING;
+
+        var address = self._httpServer.address();
+        self.hostname = address.address;
+        self.family = address.family;
+        self.port = address.port;
+
+        if (callback) {
+            callback(null);
+            return;
+        }
+    }
+
+    destroy(callback?: Callback<void>) {
+        var self = this;
+
+        if (self._state !== T_STATE_LISTENING) {
+            return;
+        }
+
+        self._state = T_STATE_DESTROYING;
+
+        self._httpServer.close(function bindOnServerDestroyed() {
+            self._onServerDestroyed(callback);
+        });
+    }
+
+    _onServerDestroyed(callback?: Callback<void>) {
+        this._state = T_STATE_DESTROYED;
+
+        if (callback) {
+            callback(null);
+            return;
+        }
     }
 }

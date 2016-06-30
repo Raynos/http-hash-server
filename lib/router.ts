@@ -24,12 +24,16 @@ var METHOD_NOT_ALLOWED_HEADERS = {
 
 export default HttpServiceRouter;
 
+type UrlObj = {
+    pathname: string
+}
+
 type ServerHandlerFn = (
     req: ServerRequest, res: ServerResponse, opts: HandlerOpts
 ) => void;
 
-type HandlerOpts = {
-    requestContext: HttpRequestContext;
+export type HandlerOpts = {
+    requestContext?: HttpRequestContext;
 };
 
 type RoutesInfo = {
@@ -191,7 +195,7 @@ class Endpoint {
     handleRequest(
         req: ServerRequest,
         res: ServerResponse,
-        opts: HandlerOpts
+        opts: { requestContext: HttpRequestContext }
     ) {
         var requestContext = opts.requestContext;
         requestContext.serviceName = this.serviceName;
@@ -211,12 +215,14 @@ function defaultMethodNotAllowed(req: ServerRequest, res: ServerResponse) {
 }
 
 class HttpRequestContext {
+    requestTime: number;
+    parsedUrl: UrlObj;
     serviceName: string | null;
     methodName: string | null;
+    params: null;
+    splat: null;
 
-    constructor(requestTime: number, parsedUrl: {
-        pathname: string
-    }, route: {
+    constructor(requestTime: number, parsedUrl: UrlObj, route: {
         params: null;
         splat: null;
     }) {
