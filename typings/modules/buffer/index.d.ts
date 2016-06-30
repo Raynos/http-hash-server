@@ -1,24 +1,26 @@
 declare module "buffer" {
-    declare var Buffer: {
+    class Buffer {
+        length: number;
+
         /**
          * Allocates a new buffer containing the given {str}.
          *
          * @param str String to store in buffer.
          * @param encoding encoding to use, optional.  Default is 'utf8'
          */
-        new (str: string, encoding?: string): Buffer;
+        constructor(str: string, encoding?: string);
         /**
          * Allocates a new buffer of {size} octets.
          *
          * @param size count of octets to allocate.
          */
-        new (size: number): Buffer;
+        constructor(size: number);
         /**
          * Allocates a new buffer containing the given {array} of octets.
          *
          * @param array The octets to store.
          */
-        new (array: Uint8Array): Buffer;
+        constructor(array: Uint8Array);
         /**
          * Produces a Buffer backed by the same allocated memory as
          * the given {ArrayBuffer}.
@@ -26,20 +28,19 @@ declare module "buffer" {
          *
          * @param arrayBuffer The ArrayBuffer with which to share memory.
          */
-        new (arrayBuffer: ArrayBuffer): Buffer;
+        constructor(arrayBuffer: ArrayBuffer);
         /**
          * Allocates a new buffer containing the given {array} of octets.
          *
          * @param array The octets to store.
          */
-        new (array: any[]): Buffer;
+        constructor(array: any[]);
         /**
          * Copies the passed {buffer} data onto a new {Buffer} instance.
          *
          * @param buffer The buffer to copy.
          */
-        new (buffer: Buffer): Buffer;
-        prototype: Buffer;
+        constructor(buffer: Buffer);
         /**
          * Allocates a new Buffer using an {array} of octets.
          *
@@ -131,9 +132,7 @@ declare module "buffer" {
          * @param size count of octets to allocate
          */
         allocUnsafeSlow(size: number): Buffer;
-    };
-
-
+    }
 
     export var INSPECT_MAX_BYTES: number;
     export { Buffer };

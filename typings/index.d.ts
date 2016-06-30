@@ -4,3 +4,4 @@
 /// <reference path="modules/http/index.d.ts" />
 /// <reference path="modules/assert/index.d.ts" />
 /// <reference path="modules/buffer/index.d.ts" />
+/// <reference path="modules/net/index.d.ts" />

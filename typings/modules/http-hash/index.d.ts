@@ -5,7 +5,10 @@ declare module 'http-hash' {
         constructor();
 
         get(key: string): {
-            handler: T
+            handler: T,
+            splat: null,
+            params: null,
+            src: null
         };
         set(key: string, v: T): void;
     }

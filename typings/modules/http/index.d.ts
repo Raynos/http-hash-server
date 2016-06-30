@@ -53,7 +53,6 @@ declare module "http" {
          * Only valid for response obtained from http.ClientRequest.
          */
         statusMessage?: string;
-        socket: net.Socket;
     }
 
     export interface ServerRequest {
@@ -67,7 +66,55 @@ declare module "http" {
         url: string;
 
         statusMessage?: string;
-        socket: net.Socket;
+    }
+
+    export interface Socket {
+
+    }
+
+    export function createServer(
+        requestListener?: (
+            request: ServerRequest, response: ServerResponse
+        ) => void
+    ): Server;
+
+    export interface ListenOptions {
+        port?: number;
+        host?: string;
+        backlog?: number;
+        path?: string;
+        exclusive?: boolean;
+    }
+
+    export interface Server {
+        setTimeout(msecs: number, callback: Function): void;
+        maxHeadersCount: number;
+        timeout: number;
+
+        listen(port: number, hostname?: string, backlog?: number, listeningListener?: Function): Server;
+        listen(port: number, hostname?: string, listeningListener?: Function): Server;
+        listen(port: number, backlog?: number, listeningListener?: Function): Server;
+        listen(port: number, listeningListener?: Function): Server;
+        listen(path: string, backlog?: number, listeningListener?: Function): Server;
+        listen(path: string, listeningListener?: Function): Server;
+        listen(handle: any, backlog?: number, listeningListener?: Function): Server;
+        listen(handle: any, listeningListener?: Function): Server;
+        listen(options: ListenOptions, listeningListener?: Function): Server;
+
+        address(): { port: number; family: string; address: string; };
+
+        close(callback?: Function): Server;
+
+        on(event: 'request', handler: (
+            req: ServerRequest, res: ServerResponse
+        ) => void): void;
+
+
+        on(event: 'connection', handler: (
+            socket: Socket
+        ) => void): void;
+
+        on(event: 'error', handler: (err: Error) => void): void;
     }
 
 }
