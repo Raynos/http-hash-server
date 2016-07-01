@@ -22,8 +22,6 @@ var METHOD_NOT_ALLOWED_HEADERS = {
     'content-length': METHOD_NOT_ALLOWED_BODY.length
 };
 
-export default HttpServiceRouter;
-
 type UrlObj = {
     pathname: string
 }
@@ -234,3 +232,5 @@ class HttpRequestContext {
         this.methodName = null;
     }
 }
+
+export default HttpServiceRouter;

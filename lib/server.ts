@@ -21,8 +21,6 @@ var T_STATE_LISTENING = 2;
 var T_STATE_DESTROYING = 3;
 var T_STATE_DESTROYED = 4;
 
-export default HttpHashServer;
-
 class HttpHashServer {
     _state: number;
     _httpServer: Server;
@@ -168,3 +166,5 @@ class HttpHashServer {
         }
     }
 }
+
+export default HttpHashServer;
