@@ -6,7 +6,7 @@ var http = require('http');
 var BodyReader = require('./lib/body-reader.js');
 var TypedRequestClient = require('./lib/typed-request-client.js');
 
-var createServer = require('../build/index.js');
+var createServer = require('../index');
 
 test('Basic service', function t(assert) {
     var routes = [{

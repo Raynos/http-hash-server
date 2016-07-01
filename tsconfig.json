@@ -6,10 +6,12 @@
         "noImplicitAny": true,
         "noImplicitUseStrict": true,
         "noImplicitThis": true,
+        "sourceMap": true,
         "strictNullChecks": true
     },
     "files": [
         "index.ts",
+        "test/index.js",
         "typings/index.d.ts"
     ]
 }

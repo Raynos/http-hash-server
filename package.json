@@ -26,9 +26,11 @@
     "eslint": "1.8.0",
     "eslint-config-perf-standard": "2.0.0",
     "eslint-plugin-perf-standard": "1.0.2",
-    "istanbul": "^0.3.5",
+    "istanbul": "0.4.4",
     "opn": "^1.0.1",
+    "remap-istanbul": "git://github.com/raynos/remap-istanbul.git#0f074a663475751e3e04fb837628343237f7edbf",
     "tape": "^3.4.0",
+    "ts-node": "0.9.3",
     "tsd": "0.6.5",
     "typescript": "1.9.0-dev.20160610-1.0",
     "typings": "1.0.4"
@@ -43,11 +45,12 @@
     "travis": "npm run cover -s && istanbul report lcov && ((cat coverage/lcov.info | coveralls) || exit 0)",
     "check-cover": "istanbul check-coverage --branches=100 --lines=100 --functions=100",
     "check-ls": "npm ls 1>/dev/null",
-    "cover": "npm run test-cover -s && npm run check-cover -s",
+    "build": "tsc",
+    "cover": "npm run build && npm run test-cover -s && npm run check-cover -s",
     "lint": "eslint $(git ls-files | grep '.js$')",
     "test": "npm run check-ls -s && npm run lint -s && npm run cover -s",
-    "test-cover": "istanbul cover --report html --print detail -- test/index.js",
-    "view-cover": "opn ./coverage/index.html"
+    "test-cover": "istanbul cover --report html --print detail -- build/test/index.js",
+    "view-cover": "ts-node ./node_modules/.bin/remap-istanbul -i ./coverage/coverage.json -o coverage -t html && opn ./coverage/index.html"
   },
   "engines": {
     "node": ">= 0.10.x"
