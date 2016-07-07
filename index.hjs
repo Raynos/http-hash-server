@@ -1,3 +1,4 @@
+-- vim: set ft=Haskell:
 import { TRouterOpts, TServicesInfo, THttpServiceRouter } from "./lib/router.hjs"
 import { THttpHashServer } from "./lib/server.hjs"
 import { THttpReq, THttpRes } from "./definitions/http.hjs"
